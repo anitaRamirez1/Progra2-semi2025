@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.ugb.miprimeraplicacion2"
+    namespace = "com.ugb.miprimeraaplicacion"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.ugb.miprimeraplicacion2"
+        applicationId = "com.ugb.miprimeraaplicacion"
         minSdk = 22
         targetSdk = 35
         versionCode = 1
