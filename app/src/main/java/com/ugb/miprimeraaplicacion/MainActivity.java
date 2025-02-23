@@ -16,6 +16,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.ugb.miprimeraplicacion2.R;
+
 public class MainActivity extends AppCompatActivity {
     TabHost tbh;
     Button btn;
