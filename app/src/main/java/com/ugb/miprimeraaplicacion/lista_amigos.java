@@ -1,16 +1,23 @@
 package com.ugb.miprimeraaplicacion;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -34,21 +41,114 @@ public class lista_amigos extends Activity {
     JSONObject jsonObject;
     amigos misAmigos;
     FloatingActionButton fab;
+    int posicion = 0;
+    obtenerDatosServidor datosServidor;
+    detectarInternet di;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_amigos);
 
+        parametros.putString("accion", "nuevo");
         db = new DB(this);
 
         fab = findViewById(R.id.fabAgregarAmigo);
         fab.setOnClickListener(view -> abriVentana());
-        obtenerDatosAmigos();
+        listarDatos();
         buscarAmigos();
+    }
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mimenu, menu);
+        try {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+            posicion = info.position;
+            menu.setHeaderTitle(jsonArray.getJSONObject(posicion).getJSONObject("value").getString("nombre"));
+        } catch (Exception e) {
+            mostrarMsg("Error: " + e.getMessage());
+        }
+    }
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        try{
+            if( item.getItemId()==R.id.mnxNuevo){
+                abriVentana();
+            }else if( item.getItemId()==R.id.mnxModificar){
+                parametros.putString("accion", "modificar");
+                parametros.putString("amigos", jsonArray.getJSONObject(posicion).getJSONObject("value").toString());
+                abriVentana();
+            } else if (item.getItemId()==R.id.mnxEliminar) {
+                eliminarAmigo();
+            }
+            return true;
+        }catch (Exception e){
+            mostrarMsg("Error: " + e.getMessage());
+            return super.onContextItemSelected(item);
+        }
+    }
+    private void eliminarAmigo(){
+        try{
+            String nombre = jsonArray.getJSONObject(posicion).getJSONObject("value").getString("nombre");
+            AlertDialog.Builder confirmacion = new AlertDialog.Builder(this);
+            confirmacion.setTitle("Esta seguro de eliminar a: ");
+            confirmacion.setMessage(nombre);
+            confirmacion.setPositiveButton("Si", (dialog, which) -> {
+                try {
+
+                    di = new detectarInternet(this);
+                    if (di.hayConexionInternet()) { //online
+                       JSONObject datosAmigos = new JSONObject();
+                       String _id = jsonArray.getJSONObject(posicion).getJSONObject("value").getString("_id");
+                       String _rev = jsonArray.getJSONObject(posicion).getJSONObject("value").getString("_rev");
+                       String url = utilidades.url_consulta + "/" + _id + "?rev=" + _rev;
+                       enviarDatosServidor objEnviarDatosServidor = new enviarDatosServidor(this);
+                       String respuesta  = objEnviarDatosServidor.execute(datosAmigos.toString(),"DELETE",url).get();
+                       JSONObject respuestaJASON = new JSONObject(respuesta);
+
+
+                    }
+
+                    String respuesta = db.administrar_amigos("eliminar", new String[]{jsonArray.getJSONObject(posicion).getJSONObject("value").getString("idAmigo")});
+                    if(respuesta.equals("ok")) {
+                        obtenerDatosAmigos();
+                        mostrarMsg("Registro eliminado con exito");
+                    }else{
+                        mostrarMsg("Error: " + respuesta);
+                    }
+                }catch (Exception e){
+                    mostrarMsg("Error: " + e.getMessage());
+                }
+            });
+            confirmacion.setNegativeButton("No", (dialog, which) -> {
+                dialog.dismiss();
+            });
+            confirmacion.create().show();
+        }catch (Exception e){
+            mostrarMsg("Error: " + e.getMessage());
+        }
     }
     private void abriVentana(){
         Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtras(parametros);
         startActivity(intent);
+    }
+    private void listarDatos(){
+        try{
+            di = new detectarInternet(this);
+            if(di.hayConexionInternet()){//online
+                datosServidor = new obtenerDatosServidor();
+                String respuesta = datosServidor.execute().get();
+                jsonObject = new JSONObject(respuesta);
+                jsonArray = jsonObject.getJSONArray("rows");
+                mostrarDatosAmigos();
+            }else{//offline
+                obtenerDatosAmigos();
+            }
+        }catch (Exception e){
+            mostrarMsg("Error: " + e.getMessage());
+        }
     }
     private void obtenerDatosAmigos(){
         try{
@@ -83,7 +183,7 @@ public class lista_amigos extends Activity {
                 alAmigosCopia.clear();
 
                 for (int i=0; i<jsonArray.length(); i++){
-                    jsonObject = jsonArray.getJSONObject(i);
+                    jsonObject = jsonArray.getJSONObject(i).getJSONObject("value");
                     misAmigos = new amigos(
                             jsonObject.getString("idAmigo"),
                             jsonObject.getString("nombre"),
@@ -91,7 +191,7 @@ public class lista_amigos extends Activity {
                             jsonObject.getString("telefono"),
                             jsonObject.getString("email"),
                             jsonObject.getString("dui"),
-                            jsonObject.getString("foto")
+                            jsonObject.getString("urlFoto")
                     );
                     alAmigos.add(misAmigos);
                 }

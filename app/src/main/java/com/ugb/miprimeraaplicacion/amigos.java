@@ -51,7 +51,6 @@ public class amigos {
         this.telefono = telefono;
     }
 
-
     public String getEmail() {
         return email;
     }
