@@ -5,6 +5,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -17,71 +21,58 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
     TextView tempVal;
-    SensorManager sensorManager;
-    Sensor sensor;
-    SensorEventListener sensorEventListener;
+    Button btn;
+    MediaPlayer mediaPlayer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        sensorLuz();
-    }
-    @Override
-    protected void onResume() {
-        iniciar();
-        super.onResume();
-    }
-    @Override
-    protected void onPause() {
-        detener();
-        super.onPause();
-    }
-    private void iniciar(){
-        sensorManager.registerListener(sensorEventListener, sensor, 2000*1000);
-    }
-    private void detener(){
-        sensorManager.unregisterListener(sensorEventListener);
-    }
-    private void sensorLuz(){
-        tempVal = findViewById(R.id.lblSensorProximidad);
-        tempVal = findViewById(R.id.lblSensorAcelerometro);
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        if( sensor==null ){
-            tempVal.setText("Tu dispositivo, NO tiene el senor de PROXIMIDAD");
-            tempVal.setText("Tu dispositivo, NO tiene el senor de ACELEROMETRO");
-            finish();
-        }
-        sensorEventListener = new SensorEventListener() {
+        tempVal = findViewById(R.id.lblReproductorMusica);
+        reproductorMusca();
+        btn = findViewById(R.id.btnIniciar);
+        btn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onSensorChanged(SensorEvent event) {
-                double valor = event.values[0];
-                tempVal.setText("Proximidad: "+ valor);
-
-                if(valor<=4){
-                    getWindow().getDecorView().setBackgroundColor(Color.BLACK);
-                }else if(valor<=8){
-                    getWindow().getDecorView().setBackgroundColor(Color.GRAY);
-                }else{
-                    getWindow().getDecorView().setBackgroundColor(Color.WHITE);
-                }
-                double x = event.values[0];
-                double y = event.values[1];
-                double z = event.values[2];
-                tempVal.setText("Desplazamiento X= "+ x +"; Y= "+ y + "; Z= "+ z);
+            public void onClick(View v) {
+                iniciar();
             }
+        });
+        btn = findViewById(R.id.btnPausar);
+        btn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+            public void onClick(View v) {
+                pausar();
             }
-        };
+        });
+        btn = findViewById(R.id.btnParar);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                detener();
+            }
+        });
+    }
+    void reproductorMusca(){
+        mediaPlayer = MediaPlayer.create(this, R.raw.audio);
+    }
+    void iniciar(){
+        mediaPlayer.start();
+        tempVal.setText("Reproduciendo...");
+    }
+    void pausar(){
+        mediaPlayer.pause();
+        tempVal.setText("Pausado...");
+    }
+    void detener(){
+        mediaPlayer.stop();
+        tempVal.setText("Detenido...");
+        reproductorMusca();
     }
 }
