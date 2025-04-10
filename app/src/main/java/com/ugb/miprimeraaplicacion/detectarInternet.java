@@ -24,4 +24,5 @@ public class detectarInternet {
         }
         return false;
     }
+
 }

@@ -4,6 +4,7 @@ public class amigos {
     String idAmigo;
     String nombre;
     String direccion;
+
     String telefono;
     String email;
     String dui;

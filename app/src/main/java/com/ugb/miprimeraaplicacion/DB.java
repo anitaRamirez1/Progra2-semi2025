@@ -21,6 +21,7 @@ public class DB extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //Actualizar la estrucutra de la base de datos si es necesario
     }
+
     public String administrar_amigos(String accion, String[] datos) {
         try{
             SQLiteDatabase db = getWritableDatabase();

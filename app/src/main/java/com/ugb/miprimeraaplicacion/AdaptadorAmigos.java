@@ -17,6 +17,7 @@ public class AdaptadorAmigos extends BaseAdapter {
     Context context;
     ArrayList<amigos> alAmigos;
     amigos misAmigos;
+
     LayoutInflater inflater;
 
     public AdaptadorAmigos(Context context, ArrayList<amigos> alAmigos) {

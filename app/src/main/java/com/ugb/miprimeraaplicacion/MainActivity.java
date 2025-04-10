@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         mostrarDatos();
         tomarFoto();
     }
+
     private void mostrarDatos(){
         try {
             Bundle parametros = getIntent().getExtras();
@@ -109,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -123,8 +125,6 @@ public class MainActivity extends AppCompatActivity {
             mostrarMsg("Error: "+e.getMessage());
         }
     }
-
-
 
     private File crearImagenAmigo() throws Exception{
         String fechaHoraMs = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()),

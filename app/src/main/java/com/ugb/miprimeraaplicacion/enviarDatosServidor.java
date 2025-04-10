@@ -17,6 +17,7 @@ public class enviarDatosServidor extends AsyncTask<String, String, String> {
     Context context;
     String respuesta = "";
     HttpURLConnection httpURLConnection;
+
     public enviarDatosServidor(Context context){
         this.context = context;
     }
