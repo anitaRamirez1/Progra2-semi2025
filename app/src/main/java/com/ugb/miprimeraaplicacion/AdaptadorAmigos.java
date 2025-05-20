@@ -19,6 +19,7 @@ public class AdaptadorAmigos extends BaseAdapter {
     amigos misAmigos;
     LayoutInflater inflater;
 
+
     public AdaptadorAmigos(Context context, ArrayList<amigos> alAmigos) {
         this.context = context;
         this.alAmigos = alAmigos;
