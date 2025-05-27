@@ -8,6 +8,7 @@ public class amigos {
     String email;
     String dui;
     String foto;
+    String fondo;
     String urlCompletaFotoFirestore;
     String token;
 
